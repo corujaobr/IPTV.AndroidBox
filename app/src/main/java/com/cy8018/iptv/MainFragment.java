@@ -181,6 +181,9 @@ public class MainFragment extends BrowseFragment {
                     Intent intent = new Intent(getActivity(), BrowseErrorActivity.class);
                     startActivity(intent);
                 } else {
+                    Intent intent = new Intent(getActivity(), TvChannelsActivity.class);
+                    startActivity(intent);
+
                     Toast.makeText(getActivity(), ((String) item), Toast.LENGTH_SHORT).show();
                 }
             }

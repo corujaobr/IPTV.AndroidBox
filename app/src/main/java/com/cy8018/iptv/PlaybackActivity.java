@@ -14,7 +14,10 @@
 
 package com.cy8018.iptv;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -23,14 +26,47 @@ import androidx.fragment.app.FragmentActivity;
  */
 public class PlaybackActivity extends FragmentActivity {
 
+    private static final String TAG = "PlaybackActivity";
+
+    private PlaybackVideoFragment mFragment;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mFragment = new PlaybackVideoFragment();
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(android.R.id.content, new PlaybackVideoFragment())
+                    .replace(android.R.id.content, mFragment)
                     .commit();
         }
+    }
+
+    @SuppressLint("RestrictedApi")
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_UP) {
+            Log.d(TAG, "----------------------------dispatchKeyEvent:   Event:" + event.getKeyCode());
+            mFragment.SwitchChanel(true);
+            return true;
+        }
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_DOWN) {
+            Log.d(TAG, "----------------------------dispatchKeyEvent:   Event:" + event.getKeyCode());
+            mFragment.SwitchChanel(false);
+            return true;
+        }
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT) {
+            Log.d(TAG, "----------------------------dispatchKeyEvent:   Event:" + event.getKeyCode());
+            mFragment.SwitchSource(false);
+            return true;
+        }
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT) {
+            Log.d(TAG, "----------------------------dispatchKeyEvent:   Event:" + event.getKeyCode());
+            mFragment.SwitchSource(true);
+            return true;
+        }
+
+        return super.dispatchKeyEvent(event);
     }
 }

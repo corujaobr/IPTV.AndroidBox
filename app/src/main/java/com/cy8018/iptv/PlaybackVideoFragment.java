@@ -16,13 +16,17 @@ package com.cy8018.iptv;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.leanback.app.VideoFragmentGlueHost;
 import androidx.leanback.app.VideoSupportFragment;
 import androidx.leanback.app.VideoSupportFragmentGlueHost;
 import androidx.leanback.media.MediaPlayerAdapter;
+import androidx.leanback.media.PlaybackGlue;
 import androidx.leanback.media.PlaybackTransportControlGlue;
 import androidx.leanback.widget.PlaybackControlsRow;
+
+import java.util.ArrayList;
 
 /**
  * Handles video playback with media controls.
@@ -31,39 +35,104 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
 
     private VideoMediaPlayerGlue<ExoPlayerAdapter> mMediaPlayerGlue;
     final VideoSupportFragmentGlueHost mHost = new VideoSupportFragmentGlueHost(this);
+    private Station currentStation = null;
+    private ArrayList<Station> mStationList;
+    private int currentSourceIndex = 0;
 
+    private static final String TAG = "PlaybackVideoFragment";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setBackgroundType(BG_LIGHT);
         ExoPlayerAdapter playerAdapter = new ExoPlayerAdapter(getActivity());
         mMediaPlayerGlue = new VideoMediaPlayerGlue(getActivity(), playerAdapter);
         mMediaPlayerGlue.setHost(mHost);
         mMediaPlayerGlue.setMode(PlaybackControlsRow.RepeatAction.NONE);
         mMediaPlayerGlue.setSeekEnabled(false);
-//        MediaMetaData intentMetaData = getActivity().getIntent().getParcelableExtra("metaData");
-//        mStationList = getActivity().getIntent().getParcelableArrayListExtra("stationList");
-//        currentStation = getActivity().getIntent().getParcelableExtra("currentStation");
 
-//        if (intentMetaData != null) {
-//            mMediaPlayerGlue.setTitle(intentMetaData.getMediaTitle());
-//            mMediaPlayerGlue.setSubtitle("1/" + currentStation.url.size());
-//            mMediaPlayerGlue.getPlayerAdapter().setDataSource(
-//                    Uri.parse(intentMetaData.getMediaSourcePath()));
-//        } else {
-//            mMediaPlayerGlue.setTitle("Diving with Sharks");
-//            mMediaPlayerGlue.setSubtitle("A Googler");
-//            mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(URL));
-//        }
-//        PlaybackSeekDiskDataProvider.setDemoSeekProvider(mMediaPlayerGlue);
-//        playWhenReady(mMediaPlayerGlue);
-        setBackgroundType(BG_LIGHT);
+        mStationList = getActivity().getIntent().getParcelableArrayListExtra("stationList");
+        currentStation = getActivity().getIntent().getParcelableExtra("currentStation");
 
-        mMediaPlayerGlue.setTitle("test Title");
-        mMediaPlayerGlue.setSubtitle("");
+        mMediaPlayerGlue.setTitle(currentStation.name);
+        mMediaPlayerGlue.setSubtitle("1/" + currentStation.url.size());
+        mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(0)));
+
         mMediaPlayerGlue.playWhenPrepared();
-        playerAdapter.setDataSource(Uri.parse("http://183.207.249.14/PLTV/3/224/3221225560/index.m3u8"));
+    }
+
+    static void playWhenReady(VideoMediaPlayerGlue glue) {
+        if (glue.isPrepared()) {
+            glue.play();
+        } else {
+            glue.addPlayerCallback(new VideoMediaPlayerGlue.PlayerCallback() {
+                @Override
+                public void onPreparedStateChanged(PlaybackGlue glue) {
+                    if (glue.isPrepared()) {
+                        glue.removePlayerCallback(this);
+                        glue.play();
+                    }
+                }
+            });
+        }
+    }
+
+    public void SwitchChanel(boolean isForward) {
+        Log.d(TAG, "SwitchChanel: isForward:"+ isForward);
+
+        int index = 0;
+
+        if (isForward)
+        {
+            index = currentStation.index + 1;
+            if (index >= mStationList.size()) {
+                index = 0;
+            }
+        }
+        else {
+            index = currentStation.index - 1;
+            if (index < 0) {
+                index = mStationList.size() - 1;
+            }
+        }
+
+        currentStation = mStationList.get(index);
+
+        mMediaPlayerGlue.setTitle(currentStation.name);
+        mMediaPlayerGlue.setSubtitle("1/" + currentStation.url.size());
+        mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(0)));
+
+        currentSourceIndex = 0;
+
+        playWhenReady(mMediaPlayerGlue);
+    }
+
+    public void SwitchSource(boolean isForward) {
+        Log.d(TAG, "SwitchChanel: isForward:"+ isForward);
+
+        int index = 0;
+
+        if (isForward)
+        {
+            index = currentSourceIndex + 1;
+            if (index >= currentStation.url.size()) {
+                index = 0;
+            }
+        }
+        else {
+            index = currentSourceIndex - 1;
+            if (index < 0) {
+                index = currentStation.url.size() - 1;
+            }
+        }
+
+        currentSourceIndex = index;
+        mMediaPlayerGlue.setTitle(currentStation.name);
+        mMediaPlayerGlue.setSubtitle(index + 1 + "/" + currentStation.url.size());
+        mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(index)));
+
+        playWhenReady(mMediaPlayerGlue);
     }
 
     @Override
