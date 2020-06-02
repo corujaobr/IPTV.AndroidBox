@@ -12,24 +12,30 @@
  * the License.
  */
 
-package com.cy8018.iptv;
+package com.cy8018.iptv.model;
 
 import android.graphics.drawable.Drawable;
-
-import androidx.leanback.widget.ImageCardView;
-import androidx.leanback.widget.Presenter;
-import androidx.core.content.ContextCompat;
-
 import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.core.content.ContextCompat;
+import androidx.leanback.widget.ImageCardView;
+import androidx.leanback.widget.Presenter;
 
 import com.bumptech.glide.Glide;
+import com.cy8018.iptv.R;
+import com.cy8018.iptv.model.Station;
+
+import static android.view.View.TEXT_ALIGNMENT_CENTER;
+import static androidx.leanback.widget.BaseCardView.CARD_TYPE_INFO_UNDER;
 
 /*
  * A CardPresenter is used to generate Views and bind Objects to them on demand.
  * It contains an Image CardView
  */
-public class CardPresenter extends Presenter {
+public class StationCardPresenter extends Presenter {
     private static final String TAG = "CardPresenter";
 
     private static final int CARD_WIDTH = 313;
@@ -61,6 +67,7 @@ public class CardPresenter extends Presenter {
          */
         mDefaultCardImage = ContextCompat.getDrawable(parent.getContext(), R.drawable.movie);
 
+
         ImageCardView cardView =
                 new ImageCardView(parent.getContext()) {
                     @Override
@@ -73,29 +80,37 @@ public class CardPresenter extends Presenter {
         cardView.setFocusable(true);
         cardView.setFocusableInTouchMode(true);
         updateCardBackgroundColor(cardView, false);
+
+        cardView.setFocusable(true);
+        cardView.setFocusableInTouchMode(true);
+        //((TextView) cardView.findViewById(R.id.title_text)).setTextColor(TITLE_COLOR); // Title text
+        ((TextView) cardView.findViewById(R.id.title_text)).setTextSize(20);
+        ((TextView) cardView.findViewById(R.id.title_text)).setTextAlignment(TEXT_ALIGNMENT_CENTER);
+
         return new ViewHolder(cardView);
     }
 
     @Override
-    public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
-        Movie movie = (Movie) item;
+    public void onBindViewHolder(ViewHolder viewHolder, Object item) {
+        Station station = (Station) item;
         ImageCardView cardView = (ImageCardView) viewHolder.view;
-
+        cardView.setCardType(CARD_TYPE_INFO_UNDER);
         Log.d(TAG, "onBindViewHolder");
-        if (movie.getCardImageUrl() != null) {
-            cardView.setTitleText(movie.getTitle());
-            cardView.setContentText(movie.getStudio());
+        if (station.url != null) {
+            cardView.setTitleText(station.name);
             cardView.setMainImageDimensions(CARD_WIDTH, CARD_HEIGHT);
+            cardView.getMainImageView().setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             Glide.with(viewHolder.view.getContext())
-                    .load(movie.getCardImageUrl())
-                    .centerCrop()
+                    .asBitmap()
+                    .load(station.logo)
+                    .centerInside()
                     .error(mDefaultCardImage)
                     .into(cardView.getMainImageView());
         }
     }
 
     @Override
-    public void onUnbindViewHolder(Presenter.ViewHolder viewHolder) {
+    public void onUnbindViewHolder(ViewHolder viewHolder) {
         Log.d(TAG, "onUnbindViewHolder");
         ImageCardView cardView = (ImageCardView) viewHolder.view;
         // Remove references to images so that the garbage collector can free up memory

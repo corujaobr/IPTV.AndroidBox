@@ -13,13 +13,11 @@
  *
  */
 
-package com.cy8018.iptv;
+package com.cy8018.iptv.model;
 
 import android.content.Context;
 import androidx.leanback.widget.Presenter;
 import androidx.leanback.widget.PresenterSelector;
-
-import java.util.HashMap;
 
 /**
  * This PresenterSelector will decide what Presenter to use depending on a given card's type.

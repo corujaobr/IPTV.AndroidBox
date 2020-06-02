@@ -12,10 +12,9 @@
  * the License.
  */
 
-package com.cy8018.iptv;
+package com.cy8018.iptv.ui;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -35,8 +34,12 @@ import androidx.leanback.widget.VerticalGridPresenter;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.cy8018.iptv.R;
+import com.cy8018.iptv.model.CardPresenterSelector;
+import com.cy8018.iptv.model.Station;
+import com.cy8018.iptv.model.StationCardPresenter;
+import com.cy8018.iptv.player.PlaybackActivity;
 import com.google.gson.Gson;
-
 import java.nio.charset.StandardCharsets;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,17 +51,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 
 /**
  * Example fragment displaying videos in a vertical grid using {@link VerticalGridSupportFragment}.
  * It fetches the videos from the the url in {@link R.string videos_url} and displays the metadata
- * fetched from each video in an ImageCardView (using {@link CardPresenter}).
+ * fetched from each video in an ImageCardView (using {@link StationCardPresenter}).
  * On clicking on each one of these video cards, a fresh instance of the
  * VideoExampleActivity starts which plays the video item.
  */
@@ -67,19 +66,18 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
 
     private static final int COLUMNS = 5;
     private static final int ZOOM_FACTOR = FocusHighlight.ZOOM_FACTOR_MEDIUM;
-    private static final String TAG = "VideoGridFragment";
+    private static final String TAG = "TvChannelsFragment";
     private static final String TAG_CATEGORY = "stations";
     // Hashmap mapping category names to the list of videos in that category. This is fetched from
     // the url
     private Map<String, Station> categoryVideosMap = new HashMap<>();
 
     private ArrayList<Station> mStationList = new ArrayList<>();
-
-
     private ArrayObjectAdapter mAdapter;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setTitle("TV Channels");
         setupRowAdapter();
     }
@@ -93,7 +91,6 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
         setGridPresenter(videoGridPresenter);
 
         PresenterSelector cardPresenterSelector = new CardPresenterSelector(getActivity());
-        // VideoCardViewPresenter videoCardViewPresenter = new VideoCardViewPresenter(getActivity());
         mAdapter = new ArrayObjectAdapter(cardPresenterSelector);
         setAdapter(mAdapter);
 
@@ -107,7 +104,7 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
     }
 
     private void createRows() {
-        String urlToFetch = "https://gitee.com/cy8018/Resources/raw/master/tv/tv_station_list_ext.json";
+        String urlToFetch = getResources().getString(R.string.station_list_url);;
         fetchVideosInfo(urlToFetch);
     }
 
@@ -123,6 +120,7 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
             int index = 0;
             for(Station station : stationList) {
                 station.index = index++;
+                station.logo = getResources().getString(R.string.logo_url) + station.logo;
                 mStationList.add(station);
                 if (!categoryVideosMap.containsKey(station.name)) {
                     categoryVideosMap.put(station.name, station);

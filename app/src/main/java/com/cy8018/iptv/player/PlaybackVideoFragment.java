@@ -12,19 +12,19 @@
  * the License.
  */
 
-package com.cy8018.iptv;
+package com.cy8018.iptv.player;
 
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.leanback.app.VideoFragmentGlueHost;
 import androidx.leanback.app.VideoSupportFragment;
 import androidx.leanback.app.VideoSupportFragmentGlueHost;
-import androidx.leanback.media.MediaPlayerAdapter;
 import androidx.leanback.media.PlaybackGlue;
-import androidx.leanback.media.PlaybackTransportControlGlue;
-import androidx.leanback.widget.PlaybackControlsRow;
+
+import com.cy8018.iptv.model.Station;
+import com.cy8018.iptv.player.ExoPlayerAdapter;
+import com.cy8018.iptv.player.VideoMediaPlayerGlue;
 
 import java.util.ArrayList;
 
@@ -45,12 +45,14 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getProgressBarManager().disableProgressBar();
         setBackgroundType(BG_LIGHT);
         ExoPlayerAdapter playerAdapter = new ExoPlayerAdapter(getActivity());
         mMediaPlayerGlue = new VideoMediaPlayerGlue(getActivity(), playerAdapter);
         mMediaPlayerGlue.setHost(mHost);
-        mMediaPlayerGlue.setMode(PlaybackControlsRow.RepeatAction.NONE);
+
         mMediaPlayerGlue.setSeekEnabled(false);
+        mMediaPlayerGlue.setControlsOverlayAutoHideEnabled(true);
 
         mStationList = getActivity().getIntent().getParcelableArrayListExtra("stationList");
         currentStation = getActivity().getIntent().getParcelableExtra("currentStation");

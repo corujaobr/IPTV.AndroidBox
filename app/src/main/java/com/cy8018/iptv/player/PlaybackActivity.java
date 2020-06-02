@@ -12,11 +12,10 @@
  * the License.
  */
 
-package com.cy8018.iptv;
+package com.cy8018.iptv.player;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import androidx.fragment.app.FragmentActivity;
@@ -47,22 +46,18 @@ public class PlaybackActivity extends FragmentActivity {
     public boolean dispatchKeyEvent(KeyEvent event) {
 
         if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_UP) {
-            Log.d(TAG, "----------------------------dispatchKeyEvent:   Event:" + event.getKeyCode());
             mFragment.SwitchChanel(true);
             return true;
         }
         if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_DOWN) {
-            Log.d(TAG, "----------------------------dispatchKeyEvent:   Event:" + event.getKeyCode());
             mFragment.SwitchChanel(false);
             return true;
         }
         if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_LEFT) {
-            Log.d(TAG, "----------------------------dispatchKeyEvent:   Event:" + event.getKeyCode());
             mFragment.SwitchSource(false);
             return true;
         }
         if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_RIGHT) {
-            Log.d(TAG, "----------------------------dispatchKeyEvent:   Event:" + event.getKeyCode());
             mFragment.SwitchSource(true);
             return true;
         }

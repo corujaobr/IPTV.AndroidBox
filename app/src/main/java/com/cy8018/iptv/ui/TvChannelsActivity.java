@@ -1,10 +1,9 @@
-package com.cy8018.iptv;
+package com.cy8018.iptv.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
-
-import android.app.Activity;
 import android.os.Bundle;
+
+import com.cy8018.iptv.R;
 
 public class TvChannelsActivity extends FragmentActivity {
 

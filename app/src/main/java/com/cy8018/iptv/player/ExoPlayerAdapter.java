@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.cy8018.iptv;
+package com.cy8018.iptv.player;
 
 import android.content.Context;
 import android.net.Uri;
@@ -23,26 +23,22 @@ import androidx.leanback.media.PlayerAdapter;
 import androidx.leanback.media.SurfaceHolderGlueHost;
 import android.view.SurfaceHolder;
 
+import com.cy8018.iptv.R;
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.ProgressiveMediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.video.VideoListener;
 
 /**
  * This implementation extends the {@link PlayerAdapter} with a {@link SimpleExoPlayer}.
@@ -74,9 +70,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements ExoPlayer.EventLi
      */
     public ExoPlayerAdapter(Context context) {
         mContext = context;
-        mPlayer = ExoPlayerFactory.newSimpleInstance(mContext,
-                new DefaultTrackSelector(),
-                new DefaultLoadControl());
+        mPlayer = new SimpleExoPlayer.Builder(mContext).build();;
 
         mPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
         dataSourceFactory = new DefaultDataSourceFactory(mContext, "ExoPlayerAdapter");
@@ -103,6 +97,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements ExoPlayer.EventLi
 
     void changeToUninitialized() {
         if (mInitialized) {
+            mInitialized = false;
             mInitialized = false;
             notifyBufferingStartEnd();
             if (mHasDisplay) {
@@ -283,8 +278,8 @@ public class ExoPlayerAdapter extends PlayerAdapter implements ExoPlayer.EventLi
             return;
         }
 
-        mPlayer.setAudioStreamType(mAudioStreamType);
-        mPlayer.setVideoListener(new SimpleExoPlayer.VideoListener() {
+//        mPlayer.setAudioStreamType(mAudioStreamType);
+        mPlayer.addVideoListener(new VideoListener() {
             @Override
             public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees,
                     float pixelWidthHeightRatio) {
@@ -361,15 +356,7 @@ public class ExoPlayerAdapter extends PlayerAdapter implements ExoPlayer.EventLi
     public void onLoadingChanged(boolean isLoading) {
     }
 
-//    @Override
-//    public void onTimelineChanged(Timeline timeline, Object manifest) {
-//    }
-
     @Override
     public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
     }
-
-//    @Override
-//    public void onPositionDiscontinuity() {
-//    }
 }

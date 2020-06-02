@@ -1,4 +1,4 @@
-package com.cy8018.iptv;
+package com.cy8018.iptv.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
