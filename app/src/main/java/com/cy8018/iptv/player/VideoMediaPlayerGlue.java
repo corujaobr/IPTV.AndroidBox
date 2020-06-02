@@ -25,7 +25,20 @@ import androidx.leanback.media.PlayerAdapter;
 import androidx.leanback.widget.Action;
 import androidx.leanback.widget.ArrayObjectAdapter;
 import androidx.leanback.widget.PlaybackControlsRow;
+import androidx.leanback.widget.PlaybackRowPresenter;
+import androidx.leanback.widget.PlaybackTransportRowPresenter;
+import androidx.leanback.widget.Presenter;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.cy8018.iptv.R;
+import com.cy8018.iptv.model.Station;
 
 /**
  * PlayerGlue for video playback
@@ -38,6 +51,16 @@ public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTrans
 //    private PlaybackControlsRow.ThumbsDownAction mThumbsDownAction;
 //    private PlaybackControlsRow.PictureInPictureAction mPipAction;
 //    private PlaybackControlsRow.ClosedCaptioningAction mClosedCaptioningAction;
+
+    private Station currentStation;
+
+    public Station getCurrentStation() {
+        return currentStation;
+    }
+
+    public void setCurrentStation(Station currentStation) {
+        this.currentStation = currentStation;
+    }
 
     public VideoMediaPlayerGlue(Activity context, T impl) {
         super(context, impl);
@@ -147,4 +170,52 @@ public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTrans
 //        }
 //        notifyActionChanged(mRepeatAction);
 //    }
+
+    @Override
+    protected PlaybackRowPresenter onCreateRowPresenter() {
+        PlaybackTransportRowPresenter presenter = (PlaybackTransportRowPresenter) super.onCreateRowPresenter();
+        presenter.setDescriptionPresenter(new MyDescriptionPresenter());
+        return presenter;
+    }
+
+    private class MyDescriptionPresenter extends Presenter {
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_tv_info, parent, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(Presenter.ViewHolder viewHolder, Object item) {
+
+            VideoMediaPlayerGlue glue = (VideoMediaPlayerGlue) item;
+            ((ViewHolder)viewHolder).channelName.setText(glue.getTitle());
+            ((ViewHolder)viewHolder).sourceInfo.setText(glue.getSubtitle());
+            Glide.with(getContext())
+                    .asBitmap()
+                    .load(glue.getCurrentStation().logo)
+                    .into(((ViewHolder)viewHolder).logo);
+        }
+
+        @Override
+        public void onUnbindViewHolder(Presenter.ViewHolder viewHolder) {
+
+        }
+
+        class ViewHolder extends Presenter.ViewHolder {
+
+            TextView channelName;
+            TextView sourceInfo;
+            ImageView logo;
+
+            private ViewHolder (View itemView)
+            {
+                super(itemView);
+                channelName = itemView.findViewById(R.id.channel_name);
+                sourceInfo = itemView.findViewById(R.id.source_info);
+                logo = itemView.findViewById(R.id.logo);
+            }
+        }
+    }
 }

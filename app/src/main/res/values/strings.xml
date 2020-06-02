@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">IPTV</string>
-    <string name="station_list_url">https://gitee.com/cy8018/Resources/raw/master/tv/tv_station_list_ext_cn.json</string>
+    <string name="station_list_url">https://gitee.com/cy8018/Resources/raw/master/tv/tv_station_list_ext.json</string>
     <string name="logo_url">https://gitee.com/cy8018/Resources/raw/master/tv/logo/</string>
 </resources>

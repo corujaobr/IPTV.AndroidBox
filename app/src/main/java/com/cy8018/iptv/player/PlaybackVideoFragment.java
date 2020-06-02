@@ -23,8 +23,6 @@ import androidx.leanback.app.VideoSupportFragmentGlueHost;
 import androidx.leanback.media.PlaybackGlue;
 
 import com.cy8018.iptv.model.Station;
-import com.cy8018.iptv.player.ExoPlayerAdapter;
-import com.cy8018.iptv.player.VideoMediaPlayerGlue;
 
 import java.util.ArrayList;
 
@@ -45,7 +43,6 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getProgressBarManager().disableProgressBar();
         setBackgroundType(BG_LIGHT);
         ExoPlayerAdapter playerAdapter = new ExoPlayerAdapter(getActivity());
         mMediaPlayerGlue = new VideoMediaPlayerGlue(getActivity(), playerAdapter);
@@ -61,6 +58,7 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
         mMediaPlayerGlue.setSubtitle("1/" + currentStation.url.size());
         mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(0)));
 
+        mMediaPlayerGlue.setCurrentStation(currentStation);
         mMediaPlayerGlue.playWhenPrepared();
     }
 
@@ -106,7 +104,7 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
         mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(0)));
 
         currentSourceIndex = 0;
-
+        mMediaPlayerGlue.setCurrentStation(currentStation);
         playWhenReady(mMediaPlayerGlue);
     }
 
