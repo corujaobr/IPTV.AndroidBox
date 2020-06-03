@@ -52,6 +52,8 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
 
     public static long lastActiveTimeStamp = 0;
 
+    public static boolean isCheckerRunning = false;
+
     public final MsgHandler mHandler = new MsgHandler(this);
 
 
@@ -80,7 +82,14 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
         mMediaPlayerGlue.playWhenPrepared();
 
         SetLastActiveTime();
+        isCheckerRunning = true;
         new Thread(controlOverlayCheckRunnable).start();
+    }
+
+    @Override
+    public void onStop() {
+        isCheckerRunning = false;
+        super.onStop();
     }
 
     static void playWhenReady(VideoMediaPlayerGlue glue) {
@@ -100,10 +109,7 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
     }
 
     public void SwitchChanel(boolean isForward) {
-        Log.d(TAG, "SwitchChanel: isForward:"+ isForward);
-
         int index = 0;
-
         if (isForward)
         {
             index = currentStation.index + 1;
@@ -126,14 +132,14 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
 
         currentSourceIndex = 0;
         mMediaPlayerGlue.setCurrentStation(currentStation);
+
+        Log.d(TAG, "SwitchChanel: "+ currentStation.name);
+
         playWhenReady(mMediaPlayerGlue);
     }
 
     public void SwitchSource(boolean isForward) {
-        Log.d(TAG, "SwitchChanel: isForward:"+ isForward);
-
         int index = 0;
-
         if (isForward)
         {
             index = currentSourceIndex + 1;
@@ -150,8 +156,11 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
 
         currentSourceIndex = index;
         mMediaPlayerGlue.setTitle(currentStation.name);
-        mMediaPlayerGlue.setSubtitle(index + 1 + "/" + currentStation.url.size());
+        String sourceInfo = index + 1 + "/" + currentStation.url.size();
+        mMediaPlayerGlue.setSubtitle(sourceInfo);
         mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(index)));
+
+        Log.d(TAG, "SwitchSource: "+ currentStation.name + " (" + sourceInfo + ")");
 
         playWhenReady(mMediaPlayerGlue);
     }
@@ -174,25 +183,26 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
     }
 
     public static class MsgHandler extends Handler {
-        WeakReference<PlaybackVideoFragment> mMainActivityWeakReference;
+        WeakReference<PlaybackVideoFragment> mPlaybackVideoFragment;
 
         MsgHandler(PlaybackVideoFragment playbackVideoFragment) {
-            mMainActivityWeakReference = new WeakReference<>(playbackVideoFragment);
+            mPlaybackVideoFragment = new WeakReference<>(playbackVideoFragment);
         }
 
         @Override
         public void handleMessage(@NotNull Message msg) {
             super.handleMessage(msg);
 
-            Log.d(TAG, "Handler: msg.what = " + msg.what);
-
-            PlaybackVideoFragment playbackVideoFragment = mMainActivityWeakReference.get();
+//            Log.d(TAG, "Handler: msg.what = " + msg.what);
+            PlaybackVideoFragment playbackVideoFragment = mPlaybackVideoFragment.get();
 
             if (msg.what == MSG_SHOW_CONTROL) {
                 playbackVideoFragment.showControlsOverlay(true);
             }
             else if (msg.what == MSG_HIDE_CONTROL) {
-                playbackVideoFragment.hideControlsOverlay(true);
+                if (playbackVideoFragment.isControlsOverlayVisible()) {
+                    playbackVideoFragment.hideControlsOverlay(true);
+                }
             }
         }
     }
@@ -200,16 +210,15 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
     Runnable controlOverlayCheckRunnable = new Runnable() {
         @Override
         public void run() {
-            while (true) {
-
+            while (isCheckerRunning) {
                 try {
                     long nowTimeStamp = System.currentTimeMillis();
                     long timeDiff = (nowTimeStamp - lastActiveTimeStamp);
-                    Log.d(TAG, "time diff: " + timeDiff);
+                    //Log.d(TAG, "time diff: " + timeDiff);
                     if (timeDiff > CONTROL_OVERLAY_FADE_TIME * 1000) {
                         mHandler.sendEmptyMessage(MSG_HIDE_CONTROL);
                     }
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

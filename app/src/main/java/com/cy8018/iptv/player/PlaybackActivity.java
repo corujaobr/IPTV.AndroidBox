@@ -45,6 +45,10 @@ public class PlaybackActivity extends FragmentActivity {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
 
+        if (!(event.getKeyCode() == KeyEvent.KEYCODE_BACK && !mFragment.isControlsOverlayVisible())) {
+            mFragment.ShowControl();
+        }
+
         if (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_DPAD_UP) {
             mFragment.SwitchChanel(true);
             return true;
@@ -62,7 +66,7 @@ public class PlaybackActivity extends FragmentActivity {
             return true;
         }
 
-        mFragment.ShowControl();
+
         return super.dispatchKeyEvent(event);
     }
 }
