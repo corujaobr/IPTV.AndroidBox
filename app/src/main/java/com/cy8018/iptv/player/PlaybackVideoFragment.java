@@ -16,6 +16,8 @@ package com.cy8018.iptv.player;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import androidx.leanback.app.VideoSupportFragment;
@@ -24,6 +26,9 @@ import androidx.leanback.media.PlaybackGlue;
 
 import com.cy8018.iptv.model.Station;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -36,6 +41,19 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
     private Station currentStation = null;
     private ArrayList<Station> mStationList;
     private int currentSourceIndex = 0;
+
+    // message to show the control overlay
+    public static final int MSG_SHOW_CONTROL = 0;
+
+    // message to hide the control overlay
+    public static final int MSG_HIDE_CONTROL = 1;
+
+    public static final int CONTROL_OVERLAY_FADE_TIME = 5;
+
+    public static long lastActiveTimeStamp = 0;
+
+    public final MsgHandler mHandler = new MsgHandler(this);
+
 
     private static final String TAG = "PlaybackVideoFragment";
 
@@ -60,6 +78,9 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
 
         mMediaPlayerGlue.setCurrentStation(currentStation);
         mMediaPlayerGlue.playWhenPrepared();
+
+        SetLastActiveTime();
+        new Thread(controlOverlayCheckRunnable).start();
     }
 
     static void playWhenReady(VideoMediaPlayerGlue glue) {
@@ -135,6 +156,15 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
         playWhenReady(mMediaPlayerGlue);
     }
 
+    public void ShowControl() {
+        showControlsOverlay(true);
+        SetLastActiveTime();
+    }
+
+    public void SetLastActiveTime() {
+        lastActiveTimeStamp = System.currentTimeMillis();
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -142,4 +172,48 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
             mMediaPlayerGlue.pause();
         }
     }
+
+    public static class MsgHandler extends Handler {
+        WeakReference<PlaybackVideoFragment> mMainActivityWeakReference;
+
+        MsgHandler(PlaybackVideoFragment playbackVideoFragment) {
+            mMainActivityWeakReference = new WeakReference<>(playbackVideoFragment);
+        }
+
+        @Override
+        public void handleMessage(@NotNull Message msg) {
+            super.handleMessage(msg);
+
+            Log.d(TAG, "Handler: msg.what = " + msg.what);
+
+            PlaybackVideoFragment playbackVideoFragment = mMainActivityWeakReference.get();
+
+            if (msg.what == MSG_SHOW_CONTROL) {
+                playbackVideoFragment.showControlsOverlay(true);
+            }
+            else if (msg.what == MSG_HIDE_CONTROL) {
+                playbackVideoFragment.hideControlsOverlay(true);
+            }
+        }
+    }
+
+    Runnable controlOverlayCheckRunnable = new Runnable() {
+        @Override
+        public void run() {
+            while (true) {
+
+                try {
+                    long nowTimeStamp = System.currentTimeMillis();
+                    long timeDiff = (nowTimeStamp - lastActiveTimeStamp);
+                    Log.d(TAG, "time diff: " + timeDiff);
+                    if (timeDiff > CONTROL_OVERLAY_FADE_TIME * 1000) {
+                        mHandler.sendEmptyMessage(MSG_HIDE_CONTROL);
+                    }
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    };
 }

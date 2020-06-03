@@ -62,6 +62,7 @@ public class PlaybackActivity extends FragmentActivity {
             return true;
         }
 
+        mFragment.ShowControl();
         return super.dispatchKeyEvent(event);
     }
 }
