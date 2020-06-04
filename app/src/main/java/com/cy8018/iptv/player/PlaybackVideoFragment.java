@@ -14,6 +14,7 @@
 
 package com.cy8018.iptv.player;
 
+import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,14 +49,13 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
     // message to hide the control overlay
     public static final int MSG_HIDE_CONTROL = 1;
 
-    public static final int CONTROL_OVERLAY_FADE_TIME = 5;
+    public static final int CONTROL_OVERLAY_FADE_TIME = 3;
 
     public static long lastActiveTimeStamp = 0;
 
     public static boolean isCheckerRunning = false;
 
     public final MsgHandler mHandler = new MsgHandler(this);
-
 
     private static final String TAG = "PlaybackVideoFragment";
 
@@ -193,14 +193,13 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
         public void handleMessage(@NotNull Message msg) {
             super.handleMessage(msg);
 
-//            Log.d(TAG, "Handler: msg.what = " + msg.what);
             PlaybackVideoFragment playbackVideoFragment = mPlaybackVideoFragment.get();
 
             if (msg.what == MSG_SHOW_CONTROL) {
                 playbackVideoFragment.showControlsOverlay(true);
             }
             else if (msg.what == MSG_HIDE_CONTROL) {
-                if (playbackVideoFragment.isControlsOverlayVisible()) {
+                if (playbackVideoFragment.isControlsOverlayVisible() && playbackVideoFragment.mMediaPlayerGlue.isPlaying()) {
                     playbackVideoFragment.hideControlsOverlay(true);
                 }
             }

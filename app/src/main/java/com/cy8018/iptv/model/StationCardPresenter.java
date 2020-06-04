@@ -60,13 +60,7 @@ public class StationCardPresenter extends Presenter {
                 ContextCompat.getColor(parent.getContext(), R.color.default_background);
         sSelectedBackgroundColor =
                 ContextCompat.getColor(parent.getContext(), R.color.selected_background);
-        /*
-         * This template uses a default image in res/drawable, but the general case for Android TV
-         * will require your resources in xhdpi. For more information, see
-         * https://developer.android.com/training/tv/start/layouts.html#density-resources
-         */
-        mDefaultCardImage = ContextCompat.getDrawable(parent.getContext(), R.drawable.movie);
-
+        mDefaultCardImage = ContextCompat.getDrawable(parent.getContext(), R.drawable.tv);
 
         ImageCardView cardView =
                 new ImageCardView(parent.getContext()) {
@@ -85,7 +79,7 @@ public class StationCardPresenter extends Presenter {
         cardView.setFocusableInTouchMode(true);
         //((TextView) cardView.findViewById(R.id.title_text)).setTextColor(TITLE_COLOR); // Title text
         ((TextView) cardView.findViewById(R.id.title_text)).setTextSize(20);
-        ((TextView) cardView.findViewById(R.id.title_text)).setTextAlignment(TEXT_ALIGNMENT_CENTER);
+        cardView.findViewById(R.id.title_text).setTextAlignment(TEXT_ALIGNMENT_CENTER);
 
         return new ViewHolder(cardView);
     }

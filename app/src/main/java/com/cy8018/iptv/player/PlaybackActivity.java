@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 
 import androidx.fragment.app.FragmentActivity;
 
+
 /**
  * Loads {@link PlaybackVideoFragment}.
  */
@@ -28,6 +29,7 @@ public class PlaybackActivity extends FragmentActivity {
     private static final String TAG = "PlaybackActivity";
 
     private PlaybackVideoFragment mFragment;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +67,6 @@ public class PlaybackActivity extends FragmentActivity {
             mFragment.SwitchSource(true);
             return true;
         }
-
 
         return super.dispatchKeyEvent(event);
     }

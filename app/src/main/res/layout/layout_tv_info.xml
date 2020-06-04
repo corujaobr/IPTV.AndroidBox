@@ -27,11 +27,26 @@
         android:layout_height="wrap_content"
         android:textSize="50sp"
         />
-    <TextView
-        android:id="@+id/source_info"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="40sp"
-        />
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <TextView
+                android:id="@+id/source_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40sp"
+                />
+            <TextView
+                android:id="@+id/network_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40sp"
+                android:paddingStart="40dp"
+                />
+        </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>

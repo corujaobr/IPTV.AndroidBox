@@ -16,47 +16,51 @@
 package com.cy8018.iptv.player;
 
 import android.app.Activity;
-import android.os.Build;
+import android.net.TrafficStats;
 import android.os.Handler;
 
-import androidx.annotation.RequiresApi;
 import androidx.leanback.media.PlaybackTransportControlGlue;
 import androidx.leanback.media.PlayerAdapter;
-import androidx.leanback.widget.Action;
-import androidx.leanback.widget.ArrayObjectAdapter;
-import androidx.leanback.widget.PlaybackControlsRow;
 import androidx.leanback.widget.PlaybackRowPresenter;
-import androidx.leanback.widget.PlaybackTransportRowPresenter;
 import androidx.leanback.widget.Presenter;
 
+import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.cy8018.iptv.R;
 import com.cy8018.iptv.model.Station;
+
+import org.jetbrains.annotations.NotNull;
+import java.lang.ref.WeakReference;
 
 /**
  * PlayerGlue for video playback
  * @param <T>
  */
 public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTransportControlGlue<T> {
-
-//    private PlaybackControlsRow.RepeatAction mRepeatAction;
-//    private PlaybackControlsRow.ThumbsUpAction mThumbsUpAction;
-//    private PlaybackControlsRow.ThumbsDownAction mThumbsDownAction;
-//    private PlaybackControlsRow.PictureInPictureAction mPipAction;
-//    private PlaybackControlsRow.ClosedCaptioningAction mClosedCaptioningAction;
-
     private Station currentStation;
+
+    private long lastTotalRxBytes = 0;
+
+    private long lastTimeStamp = 0;
+
+    Activity mContext;
+
+    public static final int MSG_UPDATE_NETWORK_SPEED = 0;
 
     public Station getCurrentStation() {
         return currentStation;
     }
+
+    public static String gNetworkSpeed = "";
+
+    private static final String TAG = "VideoMediaPlayerGlue";
 
     public void setCurrentStation(Station currentStation) {
         this.currentStation = currentStation;
@@ -64,122 +68,49 @@ public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTrans
 
     public VideoMediaPlayerGlue(Activity context, T impl) {
         super(context, impl);
-//        mClosedCaptioningAction = new PlaybackControlsRow.ClosedCaptioningAction(context);
-//        mThumbsUpAction = new PlaybackControlsRow.ThumbsUpAction(context);
-//        mThumbsUpAction.setIndex(PlaybackControlsRow.ThumbsUpAction.OUTLINE);
-//        mThumbsDownAction = new PlaybackControlsRow.ThumbsDownAction(context);
-//        mThumbsDownAction.setIndex(PlaybackControlsRow.ThumbsDownAction.OUTLINE);
-//        mRepeatAction = new PlaybackControlsRow.RepeatAction(context);
-//        mPipAction = new PlaybackControlsRow.PictureInPictureAction(context);
-
+        mContext = context;
     }
-
-//    @Override
-//    protected void onCreateSecondaryActions(ArrayObjectAdapter adapter) {
-//        adapter.add(mThumbsUpAction);
-//        adapter.add(mThumbsDownAction);
-//        if (android.os.Build.VERSION.SDK_INT > 23) {
-//            adapter.add(mPipAction);
-//        }
-//    }
-
-//    @Override
-//    protected void onCreatePrimaryActions(ArrayObjectAdapter adapter) {
-//        super.onCreatePrimaryActions(adapter);
-////        adapter.add(mRepeatAction);
-////        adapter.add(mClosedCaptioningAction);
-//    }
-
-//    @RequiresApi(api = Build.VERSION_CODES.N)
-//    @Override
-//    public void onActionClicked(Action action) {
-//        if (shouldDispatchAction(action)) {
-//            dispatchAction(action);
-//            return;
-//        }
-//        super.onActionClicked(action);
-//    }
-
-//    private boolean shouldDispatchAction(Action action) {
-//        return action == mRepeatAction || action == mThumbsUpAction || action == mThumbsDownAction
-//                || action == mPipAction || action == mClosedCaptioningAction;
-//    }
-//
-//    @RequiresApi(api = Build.VERSION_CODES.N)
-//    private void dispatchAction(Action action) {
-//        if (action == mPipAction) {
-//            ((Activity) getContext()).enterPictureInPictureMode();
-//        } else {
-//            Toast.makeText(getContext(), action.toString(), Toast.LENGTH_SHORT).show();
-//            PlaybackControlsRow.MultiAction multiAction = (PlaybackControlsRow.MultiAction) action;
-//            multiAction.nextIndex();
-//            notifyActionChanged(multiAction);
-//        }
-//    }
-
-//    private void notifyActionChanged(PlaybackControlsRow.MultiAction action) {
-//        int index = -1;
-//        if (getPrimaryActionsAdapter() != null) {
-//            index = getPrimaryActionsAdapter().indexOf(action);
-//        }
-//        if (index >= 0) {
-//            getPrimaryActionsAdapter().notifyArrayItemRangeChanged(index, 1);
-//        } else {
-////            if (getSecondaryActionsAdapter() != null) {
-////                index = getSecondaryActionsAdapter().indexOf(action);
-////                if (index >= 0) {
-////                    getSecondaryActionsAdapter().notifyArrayItemRangeChanged(index, 1);
-////                }
-////            }
-//        }
-//    }
-
-//    private ArrayObjectAdapter getPrimaryActionsAdapter() {
-//        if (getControlsRow() == null) {
-//            return null;
-//        }
-//        return (ArrayObjectAdapter) getControlsRow().getPrimaryActionsAdapter();
-//    }
-
-//    private ArrayObjectAdapter getSecondaryActionsAdapter() {
-//        if (getControlsRow() == null) {
-//            return null;
-//        }
-//        return (ArrayObjectAdapter) getControlsRow().getSecondaryActionsAdapter();
-//    }
-
-//    Handler mHandler = new Handler();
-
-//    @Override
-//    protected void onPlayCompleted() {
-//        super.onPlayCompleted();
-//        mHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (mRepeatAction.getIndex() != PlaybackControlsRow.RepeatAction.NONE) {
-//                    play();
-//                }
-//            }
-//        });
-//    }
-//
-//    public void setMode(int mode) {
-//        mRepeatAction.setIndex(mode);
-//        if (getPrimaryActionsAdapter() == null) {
-//            return;
-//        }
-//        notifyActionChanged(mRepeatAction);
-//    }
 
     @Override
     protected PlaybackRowPresenter onCreateRowPresenter() {
-        PlaybackTransportRowPresenter presenter = (PlaybackTransportRowPresenter) super.onCreateRowPresenter();
+        PlayControlPresenter presenter = new PlayControlPresenter();
         presenter.setDescriptionPresenter(new MyDescriptionPresenter());
         return presenter;
     }
 
-    private class MyDescriptionPresenter extends Presenter {
+    private long getNetSpeed() {
 
+        long nowTotalRxBytes = TrafficStats.getUidRxBytes(mContext.getApplicationContext().getApplicationInfo().uid) == TrafficStats.UNSUPPORTED ? 0 : TrafficStats.getTotalRxBytes();
+        long nowTimeStamp = System.currentTimeMillis();
+        long calculationTime = (nowTimeStamp - lastTimeStamp);
+        if (calculationTime == 0) {
+            return calculationTime;
+        }
+
+        long speed = ((nowTotalRxBytes - lastTotalRxBytes) * 1000 / calculationTime);
+        lastTimeStamp = nowTimeStamp;
+        lastTotalRxBytes = nowTotalRxBytes;
+        return speed;
+    }
+
+    public String getNetSpeedText(long speed) {
+        String text = "";
+        if (speed >= 0 && speed < 1024) {
+            text = speed + " B/s";
+        } else if (speed >= 1024 && speed < (1024 * 1024)) {
+            text = speed / 1024 + " KB/s";
+        } else if (speed >= (1024 * 1024) && speed < (1024 * 1024 * 1024)) {
+            text = speed / (1024 * 1024) + " MB/s";
+        }
+        return text;
+    }
+
+    public void getBufferingInfo() {
+        gNetworkSpeed = getNetSpeedText(getNetSpeed());
+        Log.d(TAG, gNetworkSpeed);
+    }
+
+    private class MyDescriptionPresenter extends Presenter {
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_tv_info, parent, false);
@@ -203,10 +134,12 @@ public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTrans
 
         }
 
+
         class ViewHolder extends Presenter.ViewHolder {
 
             TextView channelName;
             TextView sourceInfo;
+            TextView networkSpeed;
             ImageView logo;
 
             private ViewHolder (View itemView)
@@ -214,8 +147,50 @@ public class VideoMediaPlayerGlue<T extends PlayerAdapter> extends PlaybackTrans
                 super(itemView);
                 channelName = itemView.findViewById(R.id.channel_name);
                 sourceInfo = itemView.findViewById(R.id.source_info);
+                networkSpeed = itemView.findViewById(R.id.network_speed);
                 logo = itemView.findViewById(R.id.logo);
+
+                new Thread(networkSpeedRunnable).start();
             }
+
+            public void UpdateNetworkSpeed() {
+                networkSpeed.setText(gNetworkSpeed);
+            }
+
+            public final MsgHandler mHandler = new MsgHandler(this);
+
+            public class MsgHandler extends Handler {
+                WeakReference<ViewHolder> mViewHolder;
+
+                MsgHandler(ViewHolder viewHolder) {
+                    mViewHolder = new WeakReference<ViewHolder>(viewHolder);
+                }
+
+                @Override
+                public void handleMessage(@NotNull Message msg) {
+                    super.handleMessage(msg);
+
+                    ViewHolder vh = mViewHolder.get();
+                    if (msg.what == MSG_UPDATE_NETWORK_SPEED) {
+                        getBufferingInfo();
+                        vh.UpdateNetworkSpeed();
+                    }
+                }
+            }
+
+            Runnable networkSpeedRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            mHandler.sendEmptyMessage(MSG_UPDATE_NETWORK_SPEED);
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            };
         }
     }
 }
