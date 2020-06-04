@@ -17,6 +17,7 @@ package com.cy8018.iptv.player;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.widget.Toast;
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -47,7 +48,16 @@ public class PlaybackActivity extends FragmentActivity {
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
 
-        if (!(event.getKeyCode() == KeyEvent.KEYCODE_BACK && !mFragment.isControlsOverlayVisible())) {
+//        if (event.getAction() == KeyEvent.ACTION_DOWN) {
+//            Toast toast= Toast.makeText(getApplicationContext(), "KeyCode:  "+ event.getKeyCode(), Toast.LENGTH_LONG);
+//            toast.show();
+//        }
+
+        if (!((event.getKeyCode() == KeyEvent.KEYCODE_BACK
+                && !mFragment.isControlsOverlayVisible())
+                || event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP
+                || event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_DOWN
+        )) {
             mFragment.ShowControl();
         }
 
