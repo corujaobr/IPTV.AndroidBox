@@ -14,6 +14,7 @@
 
 package com.cy8018.iptv.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -53,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Example fragment displaying videos in a vertical grid using {@link VerticalGridSupportFragment}.
@@ -78,7 +80,7 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setTitle("TV Channels");
+        setTitle(getResources().getString(R.string.channel_list_title));
         setupRowAdapter();
     }
     private void setupRowAdapter() {
@@ -95,16 +97,11 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
         setAdapter(mAdapter);
 
         prepareEntranceTransition();
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                createRows();
-            }
-        }, 1000);
+        new Handler().postDelayed(() -> createRows(), 1000);
     }
 
     private void createRows() {
-        String urlToFetch = getResources().getString(R.string.station_list_url);;
+        String urlToFetch = getResources().getString(R.string.station_list_url);
         fetchVideosInfo(urlToFetch);
     }
 
@@ -120,7 +117,7 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
             int index = 0;
             for(Station station : stationList) {
                 station.index = index++;
-                station.logo = getResources().getString(R.string.logo_url) + station.logo;
+                station.logo = String.format("%s%s", getResources().getString(R.string.logo_url), station.logo);
                 mStationList.add(station);
                 if (!categoryVideosMap.containsKey(station.name)) {
                     categoryVideosMap.put(station.name, station);
@@ -171,6 +168,7 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
      * upon success or failure of this fetching.
      * @param urlString The json file url to fetch from
      */
+    @SuppressLint("StaticFieldLeak")
     private void fetchVideosInfo(final String urlString) {
 
         new AsyncTask<Void, Void, FetchResult>() {
@@ -232,7 +230,7 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
             intent.putExtra("currentStation", station);
             intent.putParcelableArrayListExtra("stationList", mStationList);
 
-            getActivity().startActivity(intent);
+            Objects.requireNonNull(getActivity()).startActivity(intent);
         }
     }
 
