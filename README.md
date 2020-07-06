@@ -1,4 +1,4 @@
-# IPTV.AndroidBox
+# IPTV for Android Box
 
 <div align=center>
 <a href="https://play.google.com/store/apps/details?id=com.cy8018.iptv" target="_blank">
