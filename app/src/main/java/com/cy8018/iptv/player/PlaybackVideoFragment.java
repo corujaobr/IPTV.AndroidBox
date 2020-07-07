@@ -24,7 +24,10 @@ import android.util.Log;
 import androidx.leanback.app.VideoSupportFragment;
 import androidx.leanback.app.VideoSupportFragmentGlueHost;
 import androidx.leanback.media.PlaybackGlue;
+import androidx.room.Room;
 
+import com.cy8018.iptv.database.AppDatabase;
+import com.cy8018.iptv.database.StationData;
 import com.cy8018.iptv.model.Station;
 
 import org.jetbrains.annotations.NotNull;
@@ -74,9 +77,16 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
         mStationList = getActivity().getIntent().getParcelableArrayListExtra("stationList");
         currentStation = getActivity().getIntent().getParcelableExtra("currentStation");
 
+        int sourceIndex = 0;
+        StationData stationData = AppDatabase.getInstance(getActivity()).stationDao().findByName(currentStation.name);
+
+        if (stationData!= null && stationData.lastSource > 0) {
+            sourceIndex = stationData.lastSource;
+        }
+
         mMediaPlayerGlue.setTitle(currentStation.name);
-        mMediaPlayerGlue.setSubtitle("1/" + currentStation.url.size());
-        mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(0)));
+        mMediaPlayerGlue.setSubtitle(sourceIndex + 1 +"/" + currentStation.url.size());
+        mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(sourceIndex)));
 
         mMediaPlayerGlue.setCurrentStation(currentStation);
         mMediaPlayerGlue.playWhenPrepared();
@@ -127,10 +137,19 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
         currentStation = mStationList.get(index);
 
         mMediaPlayerGlue.setTitle(currentStation.name);
-        mMediaPlayerGlue.setSubtitle("1/" + currentStation.url.size());
-        mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(0)));
 
-        currentSourceIndex = 0;
+        int sourceIndex = 0;
+        StationData stationData = AppDatabase.getInstance(getActivity()).stationDao().findByName(currentStation.name);
+
+        if (stationData!= null && stationData.lastSource > 0) {
+            sourceIndex = stationData.lastSource;
+        }
+
+        currentSourceIndex = sourceIndex;
+
+        mMediaPlayerGlue.setSubtitle(currentSourceIndex + 1 +"/" + currentStation.url.size());
+        mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(currentSourceIndex)));
+
         mMediaPlayerGlue.setCurrentStation(currentStation);
 
         Log.d(TAG, "SwitchChanel: "+ currentStation.name);
@@ -159,6 +178,17 @@ public class PlaybackVideoFragment extends VideoSupportFragment {
         String sourceInfo = index + 1 + "/" + currentStation.url.size();
         mMediaPlayerGlue.setSubtitle(sourceInfo);
         mMediaPlayerGlue.getPlayerAdapter().setDataSource(Uri.parse(currentStation.url.get(index)));
+
+        if (AppDatabase.getInstance(getActivity()).stationDao().findByName(currentStation.name) != null) {
+            AppDatabase.getInstance(getActivity()).stationDao().setLastSource(currentStation.name, currentSourceIndex);
+        }
+        else {
+            StationData station = new StationData();
+            station.stationName = currentStation.name;
+            station.lastSource = currentSourceIndex;
+            station.isFavorite = false;
+            AppDatabase.getInstance(getActivity()).stationDao().insert(station);
+        }
 
         Log.d(TAG, "SwitchSource: "+ currentStation.name + " (" + sourceInfo + ")");
 

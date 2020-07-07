@@ -38,8 +38,8 @@ import static androidx.leanback.widget.BaseCardView.CARD_TYPE_INFO_UNDER;
 public class StationCardPresenter extends Presenter {
     private static final String TAG = "CardPresenter";
 
-    private static final int CARD_WIDTH = 313;
-    private static final int CARD_HEIGHT = 176;
+    private static final int CARD_WIDTH = 320;
+    private static final int CARD_HEIGHT = 180;
     private static int sSelectedBackgroundColor;
     private static int sDefaultBackgroundColor;
     private Drawable mDefaultCardImage;

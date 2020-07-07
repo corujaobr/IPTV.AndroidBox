@@ -32,10 +32,13 @@ import androidx.leanback.widget.PresenterSelector;
 import androidx.leanback.widget.Row;
 import androidx.leanback.widget.RowPresenter;
 import androidx.leanback.widget.VerticalGridPresenter;
+import androidx.room.Room;
+
 import android.util.Log;
 import android.widget.Toast;
 
 import com.cy8018.iptv.R;
+import com.cy8018.iptv.database.AppDatabase;
 import com.cy8018.iptv.model.CardPresenterSelector;
 import com.cy8018.iptv.model.Station;
 import com.cy8018.iptv.model.StationCardPresenter;
@@ -228,6 +231,7 @@ public class TvChannelsFragment extends VerticalGridSupportFragment implements
 
             Intent intent = new Intent(getActivity(), PlaybackActivity.class);
             intent.putExtra("currentStation", station);
+
             intent.putParcelableArrayListExtra("stationList", mStationList);
 
             Objects.requireNonNull(getActivity()).startActivity(intent);
